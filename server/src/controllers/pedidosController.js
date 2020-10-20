@@ -43,7 +43,7 @@ module.exports = {
     },
     async confirm(req, res){
         try{
-            const {trabalhador, valor_fechado}
+            const {trabalhador, valor_fechado} = req.body;
         }catch(e){
             return res.status(400).json({error: e.message});
         }
