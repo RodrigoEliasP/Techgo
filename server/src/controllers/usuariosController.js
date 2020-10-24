@@ -82,5 +82,21 @@ module.exports = {
         }catch(e){
             return res.status(400).json({error: e.message});
         }
-    }
+    },
+    async delete(req, res){
+        try{
+            const {id} = req.params;
+
+            const usuario = await connection.mysqlUsuarios.findOne({where:{
+                id:id
+            }});
+            usuario.status = 'inativo'
+            await usuario.save();
+            
+            return res.status(202).json({mensagem: "Conta apagada com sucesso"});
+
+        }catch(e){
+            return res.status(400).json({error: e.message});
+        }
+    },
 }

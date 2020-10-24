@@ -33,7 +33,7 @@ const mysqlTrabalhador = connection.define('trabalhadores', {
         type: DataTypes.ENUM(['ativo', 'inativo', 'premium'])
     },
     data_nascimento:{
-        type: DataTypes.DATE
+        type: DataTypes.DATEONLY
     },
     data_registro:{
         type: DataTypes.DATE
@@ -87,7 +87,7 @@ const mysqlUsuarios = connection.define('usuarios', {
         type: DataTypes.ENUM(['ativo', 'inativo', 'premium'])
     },
     data_nascimento:{
-        type: DataTypes.DATE
+        type: DataTypes.DATEONLY
     },
     data_registro:{
         type: DataTypes.DATE
@@ -105,6 +105,9 @@ const mysqlPedidos = connection.define('pedidos', {
     },
     descricao: {
         type: DataTypes.TEXT
+    },
+    localizacao:{
+        type: DataTypes.STRING(50)
     },
     data_criacao: {
         type: DataTypes.DATE

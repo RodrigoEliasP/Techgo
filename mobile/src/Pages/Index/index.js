@@ -19,11 +19,11 @@ export default function Index(){
         <SafeAreaView style = {styles.container}>
             <Text>Selecione seu tipo de usuário</Text>
 
-            <TouchableOpacity onPress={navigateToTecnico}>
+            <TouchableOpacity style={styles.btnTecnico} onPress={navigateToTecnico}>
                 <Text>Técnico</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={navigateToUsuario}>
+            <TouchableOpacity style={styles.btnUsuario} onPress={navigateToUsuario}>
                 <Text>Usuário</Text>
             </TouchableOpacity>
         </SafeAreaView>
@@ -35,5 +35,13 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 24,
         paddingTop: Constants.statusBarHeight + 20,
+    },
+    btnTecnico:{
+        paddingTop: 20,
+        height: 50
+    },
+    btnUsuario:{
+        paddingTop: 20,
+        height: 50
     }
 });

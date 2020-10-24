@@ -1,7 +1,7 @@
 const connection = require('../database/db.js');
 const uuid = require('uuid');
 const crypto = require('crypto');
-const {Op} = require('sequelize')
+const {Op} = require('sequelize');
 
 
 module.exports = {
@@ -15,6 +15,8 @@ module.exports = {
                 offset: ((page -1) * 10),
 
             });
+
+            
             
             return res.status(202).json(tecnicos.rows);
         }catch(e){
@@ -72,7 +74,9 @@ module.exports = {
                 where:{
                     nome: nome,
                     senha: sha.digest('hex'),
-                    status: 'ativo'
+                    status: {
+                        [Op.or]: ['ativo','premium']
+                    }
                 },
                 include: [connection.mysqlCategoria],
             });
@@ -81,6 +85,38 @@ module.exports = {
             }else{
                 throw new Error('Senha ou nome inválidos');
             }
+
+        }catch(e){
+            return res.status(400).json({error: e.message});
+        }
+    },
+    async delete(req, res){
+        try{
+            const {id} = req.params;
+
+            const usuario = await connection.mysqlTrabalhador.findOne({where:{
+                id:id
+            }});
+            usuario.status = 'inativo'
+            await usuario.save();
+            
+            return res.status(202).json({mensagem: "Conta apagada com sucesso"});
+
+        }catch(e){
+            return res.status(400).json({error: e.message});
+        }
+    },
+    async premium(req,res){
+        try{
+            const {id} = req.params;
+
+            const usuario = await connection.mysqlTrabalhador.findOne({where:{
+                id:id
+            }});
+            usuario.status = 'premium'
+            await usuario.save();
+            
+            return res.status(202).json({mensagem: "Conta vipada com sucesso"});
 
         }catch(e){
             return res.status(400).json({error: e.message});

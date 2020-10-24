@@ -10,6 +10,8 @@ import TecnicoMain from './Pages/TecnicoMain';
 import UsuarioMain from './Pages/UsuarioMain';
 import RegistroTecnico from './Pages/RegistroTecnico';
 import RegistroUsuario from './Pages/RegistroUsuario';
+import DetalhesPedidoTecnico from './Pages/DetalhesPedidoTecnico';
+import DetalhesPedidoUsuario from './Pages/DetalhesPedidoUsuario';
 
 const AppStack = createStackNavigator();
 
@@ -24,6 +26,8 @@ export default function Routes(){
              <AppStack.Screen name="UsuarioMain" component={ UsuarioMain }/>
              <AppStack.Screen name="RegistroTecnico" component={ RegistroTecnico }/>
              <AppStack.Screen name="RegistroUsuario" component={ RegistroUsuario }/>
+             <AppStack.Screen name="DetalhesPedidoTecnico" component={ DetalhesPedidoTecnico }/>
+             <AppStack.Screen name="DetalhesPedidoUsuario" component={ DetalhesPedidoUsuario }/>
          </AppStack.Navigator>
      </NavigationContainer>
  );

@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import Constants from 'expo-constants';
 import { SafeAreaView, AsyncStorage, Text, TouchableOpacity, StyleSheet, TextInput, Alert} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-
+import * as yup from 'yup';
 import api from '../../Services/api';
 
 export default function UsuarioCard(){
@@ -19,12 +19,19 @@ export default function UsuarioCard(){
         );
     };
 
+    const campos = yup.object().shape({
+        nome: yup.string().required('Digite seu nome'),
+        senha: yup.string().required('Digite sua senha'),
+    })
+
     async function clickLogar(){
         try{
-            const response = await api.post('usuarioLog', {
+            const dados = {
                 nome: getNome,
                 senha: getSenha
-            },{
+            }
+            campos.validateSync(dados);
+            const response = await api.post('usuarioLog', dados  ,{
                 validateStatus: status =>{
                     return status < 500
                 },
@@ -51,7 +58,7 @@ export default function UsuarioCard(){
             <Text  >Nome</Text>
             <TextInput onChangeText={setNome} />
             <Text>Senha</Text>
-            <TextInput onChangeText={setSenha}/>
+            <TextInput secureTextEntry={true} onChangeText={setSenha}/>
             <TouchableOpacity onPress={clickLogar}>
                 <Text>
                     Logar

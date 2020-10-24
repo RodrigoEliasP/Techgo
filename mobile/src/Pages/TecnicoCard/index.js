@@ -2,6 +2,8 @@ import React, {useState} from 'react';
 import Constants from 'expo-constants';
 import { SafeAreaView, Text, StyleSheet, TouchableOpacity ,TextInput, Alert, AsyncStorage} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import * as yup from 'yup';
+
 
 import api from '../../Services/api';
 
@@ -18,13 +20,20 @@ export default function TecnicoCard(){
             JSON.stringify(usuario)
         );
     };
+    const campos = yup.object().shape({
+        nome: yup.string().required('Digite seu nome'),
+        senha: yup.string().required('Digite sua senha'),
+    })
 
     async function clickLogar(){
         try{
-            const response = await api.post('tecnicoLog', {
+            const dados = {
                 nome: getNome,
                 senha: getSenha
-            },{
+            }
+            campos.validateSync(dados);
+
+            const response = await api.post('tecnicoLog', dados,{
                 validateStatus: status =>{
                     return status < 500
                 },
@@ -50,8 +59,8 @@ export default function TecnicoCard(){
         <SafeAreaView style={styles.container}>
             <Text  >Nome</Text>
             <TextInput onChangeText={setNome} />
-            <Text>Senha</Text>
-            <TextInput onChangeText={setSenha}/>
+            <Text >Senha</Text>
+            <TextInput secureTextEntry={true} onChangeText={setSenha}/>
             <TouchableOpacity onPress={clickLogar}>
                 <Text>
                     Logar

@@ -38,6 +38,17 @@ routes.post('/tecnicoLog', celebrate({
     })
 }), tecnicosController.log);
 
+routes.delete('/tecnicosDelete/:id', celebrate({
+    [Segments.PARAMS]: Joi.object().keys({
+        id: Joi.string().required()
+    })
+}), tecnicosController.delete)
+routes.patch('/tecnicosPremium/:id', celebrate({
+    [Segments.PARAMS]: Joi.object().keys({
+        id: Joi.string().required()
+    })
+}), tecnicosController.premium)
+
 // rotas dos usuarios
 
 routes.get('/usuariosGet', celebrate({
@@ -62,6 +73,12 @@ routes.post('/usuarioLog', celebrate({
         senha: Joi.string().required()
     })
 }), usuariosController.log);
+
+routes.delete('/usuariosDelete/:id', celebrate({
+    [Segments.PARAMS]: Joi.object().keys({
+        id: Joi.string().required()
+    })
+}), usuariosController.delete)
 //rotas dos pedidos
 
 routes.get('/pedidosGet', celebrate({
@@ -70,12 +87,41 @@ routes.get('/pedidosGet', celebrate({
     })
 }), pedidosController.index);
 
+routes.get('/pedidosGet/own',celebrate({
+    [Segments.QUERY]: Joi.object().keys({
+        page: Joi.number().positive(),
+        usuarioId: Joi.string().required(),
+        usuarioTipo: Joi.string().required()
+    })
+}), pedidosController.selectOwn)
+
 routes.post('/pedidosPost', celebrate({
     [Segments.BODY]: Joi.object().keys({
         descricao: Joi.string().required(),
         usuario: Joi.string().required().uuid(),
+        localizacao: Joi.string().required()
     })
 }), pedidosController.create);
+
+routes.put('/pedidosDemand', celebrate({
+    [Segments.BODY]: Joi.object().keys({
+        id: Joi.string().required(),
+        valor_fechado: Joi.number().positive(),
+        trabalhador: Joi.string().required()
+    })
+}), pedidosController.demand);
+
+routes.patch('/pedidosPay/:id', celebrate({
+    [Segments.PARAMS]: Joi.object().keys({
+        id: Joi.string().required()
+    })
+}), pedidosController.pay);
+
+routes.patch('/pedidosDispatch/:id', celebrate({
+    [Segments.PARAMS]: Joi.object().keys({
+        id: Joi.string().required()
+    })
+}), pedidosController.dispatch);
 
 // categorias
 routes.get('/categoriasGet', celebrate({

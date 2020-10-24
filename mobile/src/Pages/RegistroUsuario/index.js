@@ -27,9 +27,11 @@ export default function RegistroTecnico(){
 
 
 
-    async function handleOnPress(){
+    async function onPressCadastrar(){
         try{
+
             const tempo = getNascimento.split('/');
+
             const dados = {
                 cpf: getCpf.replace( /[-.]/g , ''),
                 nome: getNome,
@@ -37,7 +39,9 @@ export default function RegistroTecnico(){
                 senha: getSenha,
                 email: getEmail,
             }
+
             campos.validateSync(dados);
+            
             const resolve = await api.post('usuariosPost', dados,{
                 validateStatus: status => {
                     return status < 500;
@@ -89,7 +93,7 @@ export default function RegistroTecnico(){
             <TextInput secureTextEntry={true} onChangeText={setSenha}></TextInput>
 
 
-            <TouchableOpacity onPress={handleOnPress}>
+            <TouchableOpacity onPress={onPressCadastrar}>
                 <Text>Cadastrar</Text>
             </TouchableOpacity>
         </SafeAreaView>

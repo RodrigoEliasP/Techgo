@@ -34,7 +34,7 @@ export default function RegistroTecnico(){
         setCategoria(value);
     }
 
-    async function handleOnPress(){
+    async function onPressCadastrar(){
         try{
             const tempo = getNascimento.split('/');
             const dados = {
@@ -46,16 +46,16 @@ export default function RegistroTecnico(){
                 categoria: getCategoria
             }
             campos.validateSync(dados);
-            const resolve = await api.post('tecnicosPost', dados,{
+            const response = await api.post('tecnicosPost', dados,{
                 validateStatus: status => {
                     return status < 500;
                 }
             });
             
-            if(resolve.data.error){
-                throw new Error(resolve.data.error)
+            if(response.data.error){
+                throw new Error(response.data.error)
             }
-            Alert.alert(resolve.data.mensagem);
+            Alert.alert(response.data.mensagem);
             setTimeout(()=>{
                 Nav.goBack();
             }, 2000)
@@ -113,7 +113,7 @@ export default function RegistroTecnico(){
                   })
               }  
             ></RNPickerSelect>
-            <TouchableOpacity onPress={handleOnPress}>
+            <TouchableOpacity onPress={onPressCadastrar}>
                 <Text>Cadastrar</Text>
             </TouchableOpacity>
         </SafeAreaView>
