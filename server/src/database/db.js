@@ -120,6 +120,10 @@ const mysqlPedidos = connection.define('pedidos', {
         type: DataTypes.DECIMAL(10,2),
         defaultValue: null
     },
+    status:{
+        type: DataTypes.ENUM(['pendente', 'cobrar', 'fechado']),
+        defaultValue: 'pendente'
+    },
     trabalhadores_id: {
         type: DataTypes.UUIDV4,
         defaultValue: null

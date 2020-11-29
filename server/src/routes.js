@@ -12,8 +12,6 @@ routes.get('/', (req, res) =>{
     res.sendStatus(200).json({message: "api on"})
 });
 
-// rotas dos técnicos
-
 routes.get('/tecnicosGet', celebrate({
     [Segments.QUERY]: Joi.object().keys({
         page: Joi.number().positive()
@@ -49,7 +47,6 @@ routes.patch('/tecnicosPremium/:id', celebrate({
     })
 }), tecnicosController.premium)
 
-// rotas dos usuarios
 
 routes.get('/usuariosGet', celebrate({
     [Segments.QUERY]: Joi.object().keys({
@@ -79,7 +76,6 @@ routes.delete('/usuariosDelete/:id', celebrate({
         id: Joi.string().required()
     })
 }), usuariosController.delete)
-//rotas dos pedidos
 
 routes.get('/pedidosGet', celebrate({
     [Segments.QUERY]: Joi.object().keys({
@@ -91,7 +87,8 @@ routes.get('/pedidosGet/own',celebrate({
     [Segments.QUERY]: Joi.object().keys({
         page: Joi.number().positive(),
         usuarioId: Joi.string().required(),
-        usuarioTipo: Joi.string().required()
+        usuarioTipo: Joi.string().required(),
+        status: Joi.string().required()
     })
 }), pedidosController.selectOwn)
 
@@ -111,11 +108,25 @@ routes.put('/pedidosDemand', celebrate({
     })
 }), pedidosController.demand);
 
+routes.put('/pedidosPut', celebrate({
+    [Segments.BODY]: Joi.object().keys({
+        id: Joi.string().required(),
+        descricao: Joi.string().required(),
+        localizacao: Joi.string().required()
+    })
+}), pedidosController.put);
+
 routes.patch('/pedidosPay/:id', celebrate({
     [Segments.PARAMS]: Joi.object().keys({
         id: Joi.string().required()
     })
 }), pedidosController.pay);
+
+routes.patch('/pedidosDelete/:id', celebrate({
+    [Segments.PARAMS]: Joi.object().keys({
+        id: Joi.string().required()
+    })
+}), pedidosController.delete);
 
 routes.patch('/pedidosDispatch/:id', celebrate({
     [Segments.PARAMS]: Joi.object().keys({
@@ -123,7 +134,6 @@ routes.patch('/pedidosDispatch/:id', celebrate({
     })
 }), pedidosController.dispatch);
 
-// categorias
 routes.get('/categoriasGet', celebrate({
     [Segments.QUERY]: Joi.object().keys({
         page: Joi.number().positive()

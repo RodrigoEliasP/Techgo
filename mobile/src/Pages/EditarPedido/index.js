@@ -1,32 +1,31 @@
 import React, {useEffect, useState} from 'react';
 import Constants from 'expo-constants'
 import { SafeAreaView, Text, AsyncStorage, StyleSheet, TouchableOpacity, Alert, TextInput, View} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import api from '../../../../Services/api';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import TopBar from '../../Components/TopBar';
+import api from '../../Services/api';
 
 import * as yup from 'yup'
 
 export default function Home(){
     const nav = useNavigation();
-
-    const [getUsuario, setUsuario] =  useState({});
+    const route = useRoute();
+    const pedido = route.params.pedido;
     const [getLocalizacao, setLocalizacao] = useState('');
     const [getDescricao, setDescricao] = useState('');
     
     async function carregarUsuario(){
         const usuario = JSON.parse(await AsyncStorage.getItem('Session'));
-        if(usuario){
-            setUsuario(usuario);
-        }else{
+        if(!usuario){
             nav.navigate('Index');
         }
     }
     const campos = yup.object().shape({
         localizacao: yup.string().required('Digite a localização'),
-        descricao: yup.string().required('Crie Uma descrição')//.min(30, 'Descrição insuficiente')
+        descricao: yup.string().required('Coloque Uma descrição válida')//.min(30, 'Descrição insuficiente')
     });
 
-    async function onPressCriar(){
+    async function onPressEditar(){
         try{
             const dados = {
                 descricao: getDescricao,
@@ -35,10 +34,10 @@ export default function Home(){
 
             campos.validateSync(dados);
 
-            const resolve = await api.post('pedidosPost', 
+            const resolve = await api.put('pedidosPut', 
             {
                 ...dados,
-                usuario: getUsuario.id
+                id: pedido.id_pedido
             }
             ,{
                 validateStatus: status => {
@@ -51,7 +50,7 @@ export default function Home(){
             Alert.alert(resolve.data.mensagem);
             setTimeout(()=>{
                 nav.navigate('Home');
-            }, 2000)
+            }, 1000)
 
         }catch(e){
             Alert.alert(e.message);
@@ -62,17 +61,18 @@ export default function Home(){
 
     return(
         <SafeAreaView style={styles.container}>
-            <Text style={styles.titulo}>Para criar um pedido nos informe:</Text>
+            <TopBar/>
+            <Text style={styles.titulo}>EditarPedido:</Text>
             <View style={styles.formContainer}>
                 <View style={styles.fieldControl}>
-                    <Text>Sua localização:</Text>
-                    <TextInput style={styles.field} onChangeText={setLocalizacao}/>
+                    <Text>Edite sua localização:</Text>
+                    <TextInput style={styles.field} defaultValue={pedido.localizacao} onChangeText={setLocalizacao}/>
                 </View>
                 <View style={styles.fieldControl}>
-                    <Text>Crie uma descrição:</Text>
-                    <TextInput multiline={true} style={styles.descField} onChangeText={setDescricao}/>
+                    <Text>Edite a descrição:</Text>
+                    <TextInput multiline={true} defaultValue={pedido.descricao} style={styles.descField} onChangeText={setDescricao}/>
                 </View>
-                <TouchableOpacity style={styles.btn} onPress={onPressCriar}>
+                <TouchableOpacity style={styles.btn} onPress={onPressEditar}>
                         <Text style={styles.btnTxt}>
                             Criar
                         </Text>
@@ -87,9 +87,10 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 24,
         paddingTop: Constants.statusBarHeight + 20,
-
+        margin: '5%'
     },
     titulo:{
+        marginTop: '10%',
         fontSize: 16,
         fontWeight: 'bold'
     },

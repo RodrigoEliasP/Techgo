@@ -31,21 +31,21 @@ export default function Home(){
 
     return(
         <SafeAreaView style={styles.container}>
-            <Text>
+            <Text style={styles.title}>
                 Para trabalhar conosco é necessário ser um usuário premium!
             </Text>
 
             <View>{
                 getTecnico.status == 'premium'? 
-                (<Text>
+                (<Text style={styles.text}>
                     Status: {getTecnico.status}
                 </Text>) : 
                 (<>
-                    <Text>
+                    <Text style={styles.text}>
                         Freemium, Assine o pacote por R$50,00 e venha trabalhar conosco!
                     </Text>
-                    <TouchableOpacity onPress={onPressPagar}>
-                        <Text>
+                    <TouchableOpacity style={styles.btnPremium} onPress={onPressPagar}>
+                        <Text style={styles.btnText}>
                             Pagar
                         </Text>
                     </TouchableOpacity>
@@ -60,5 +60,39 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 24,
         paddingTop: Constants.statusBarHeight + 20,
-    }
+    },
+    title:{
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 50
+    },
+    text:{
+        fontSize: 16,
+    },
+    btnText:{
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#FFF',
+        alignSelf: 'center'
+    },
+    btnPremium:{
+        marginTop: 50,
+        color: "white",
+        fontWeight: "bold",
+        backgroundColor: "#3d3d3d",
+        borderStyle: "solid", 
+        borderColor: "#3d3d3d",
+        borderWidth: 5,
+        borderRadius: 15,
+        shadowColor: "#000000",
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        width:"80%",
+        height: 40,
+        alignSelf: "center",
+        textAlign:"center",
+        paddingTop: 5,
+    },
 });

@@ -3,6 +3,7 @@ import Constants from 'expo-constants';
 import { SafeAreaView, Text, StyleSheet, TouchableOpacity, View, AsyncStorage, Alert } from 'react-native';
 import { TextInputMask } from 'react-native-masked-text';
 import {useNavigation, useRoute} from '@react-navigation/native';
+import TopBar from '../../Components/TopBar';
 import api from '../../Services/api'
 
 export default function DetalhesPedidoTecnico(){
@@ -27,6 +28,7 @@ export default function DetalhesPedidoTecnico(){
     async function onPressCobrar(){
         try{
             const valor = Number(getCobrança.replace(/[R$]/g, '').replace(/,/, '.'))
+            
             const dados = {
                 trabalhador: getTecnico.id,
                 valor_fechado: valor,
@@ -50,25 +52,51 @@ export default function DetalhesPedidoTecnico(){
             Alert.alert(err.message)
         }
     }
+    function bindar(status){
+        switch(status){
+            case 'pendente':
+                return (
+                    <>
+                        <TextInputMask 
+                        style={styles.field}
+                        value={getCobrança}
+                        type={'money'}
+                        onChangeText={setCobrança} />
+                        <TouchableOpacity style={styles.btnCobrar} onPress={onPressCobrar}>
+                            <Text style={styles.txtBtn}>Cobrar</Text>
+                        </TouchableOpacity>
+                    </>
+                )
+            case 'cobrar':
+                return(
+                    <Text style={styles.text}>Em andamento, aguarde seu Pagamento ou Rejeição</Text>
+                );
+            case 'fechado':
+                return(
+                    <Text style={styles.text}>
+                    Pedido fechado por R${
+                        pedido.valor_fechado.replace('.', ',')
+                    }
+                    </Text>
+                )
+        }
+    }
 
     useEffect(()=>{carregarTecnico()},[]);
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text>Detalhes do pedido:</Text>
-            <Text>Localização do pedido: {pedido.localizacao}</Text>
-            <Text>Descrição do pedido: {pedido.descricao}</Text>
-            <Text>Informações sobre o emissor:</Text>
-            <Text>Nome do Emissor: {pedido.usuario.nome}</Text>
-            <Text>Email para contato: {pedido.usuario.email}</Text>
+            <TopBar/>
+            <Text style={styles.title}>Detalhes do pedido:</Text>
+            <Text style={styles.text}>Localização do pedido: {'\n'+pedido.localizacao}</Text>
+            <Text style={styles.text}>Descrição do pedido: {'\n'+pedido.descricao}</Text>
+            <Text style={styles.text}>Informações sobre o emissor:</Text>
+            <Text style={styles.text}>Nome do Emissor: {'\n'+pedido.usuario.nome}</Text>
+            <Text style={styles.text}>Email para contato: {'\n'+pedido.usuario.email}</Text>
             <View>
-                <TextInputMask 
-                  value={getCobrança}
-                  type={'money'}
-                  onChangeText={setCobrança} />
-                <TouchableOpacity onPress={onPressCobrar}>
-                    <Text>Cobrar</Text>
-                </TouchableOpacity>
+                {
+                    bindar(pedido.status)
+                }
             </View>
         </SafeAreaView>
     );
@@ -79,5 +107,45 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 24,
         paddingTop: Constants.statusBarHeight + 20,
+        margin: '5%'
+    },
+    title:{
+        fontSize: 20,
+        fontWeight: 'bold',
+        alignSelf: 'center',
+        marginBottom: 20
+    },
+    text:{
+        fontSize: 16,
+        marginBottom: 20
+    },
+    containerBtn:{
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+    },
+    txtBtn:{
+        color: '#fff',
+        alignSelf: 'center',
+        fontSize: 20
+    },
+    field:{
+        padding: 5,
+        borderStyle: "solid",
+        borderColor: "black",
+        borderBottomWidth: 2,
+        borderRightWidth: 2,
+        borderLeftWidth: 2,
+        borderTopWidth: 2,
+        borderRadius: 2
+    },
+    btnCobrar:{
+        marginTop: 30,
+        alignSelf: 'center',
+        backgroundColor: '#00ff00',
+        width: '40%',
+        height: 40,
+        alignItems: 'center',
+        textAlign: 'center',
+        borderRadius: 9
     }
 });

@@ -8,6 +8,12 @@ module.exports = {
             
             const pedidos = await connection.mysqlPedidos.findAndCountAll({
                 include: [connection.mysqlUsuarios, connection.mysqlTrabalhador],
+                where:{
+                    status: 'pendente'
+                },
+                order:[
+                    ['data_criacao','desc']
+                ],
                 limit: 10,
                 offset: ((page -1) * 10)
             });
@@ -22,14 +28,18 @@ module.exports = {
     },
     async selectOwn(req, res){
         try{
-            const {page = 1, usuarioId, usuarioTipo} = req.query;
+            const {page = 1, usuarioId, usuarioTipo, status} = req.query;
 
             if(usuarioTipo == "usuario"){
 
                 const pedidos = await connection.mysqlPedidos.findAndCountAll({
                     where:{
-                        usuarios_id: usuarioId
+                        usuarios_id: usuarioId,
+                        status
                     },
+                    order:[
+                        ['data_criacao','desc']
+                    ],
                     include: [connection.mysqlUsuarios, connection.mysqlTrabalhador],
                     limit: 10,
                     offset: ((page -1) * 10)
@@ -41,7 +51,8 @@ module.exports = {
             }else{
                 const pedidos = await connection.mysqlPedidos.findAndCountAll({
                     where:{
-                        trabalhadores_id: usuarioId
+                        trabalhadores_id: usuarioId,
+                        status
                     },
                     include: [connection.mysqlUsuarios, connection.mysqlTrabalhador],
                     limit: 10,
@@ -68,6 +79,7 @@ module.exports = {
                 localizacao: localizacao,
                 data_conclusao: null,
                 valor_fechado: null,
+                status: 'pendente',
                 trabalhadores_id: null,
                 usuarios_id: usuario
             }
@@ -89,6 +101,7 @@ module.exports = {
 
             pedido.valor_fechado = valor_fechado;
             pedido.trabalhadores_id = trabalhador;
+            pedido.status =  'cobrar';
 
             await pedido.save();
 
@@ -106,6 +119,7 @@ module.exports = {
 
             pedido.valor_fechado = null;
             pedido.trabalhadores_id = null;
+            pedido.status =  'fechado';
 
             await pedido.save();
 
@@ -122,6 +136,7 @@ module.exports = {
             const pedido = await connection.mysqlPedidos.findOne({where:{id_pedido: id}});
 
             pedido.data_conclusao = Date.now()
+            pedido.status = 'fechado'
 
             await pedido.save();
 
@@ -130,5 +145,36 @@ module.exports = {
         }catch(e){
             return res.status(400).json({error: e.message});
         }
-    }
+    },
+    async delete(req, res){
+        try{
+            const {id} = req.params;
+
+            const pedido = await connection.mysqlPedidos.findOne({where:{id_pedido: id}});
+
+            await pedido.destroy();
+
+            return res.status(202).json({mensagem: "Pedido cancelado"});
+            
+        }catch(e){
+            return res.status(400).json({error: e.message});
+        }
+    },
+    async put(req, res){
+        try{
+            const {id, localizacao, descricao} = req.body;
+
+            const pedido = await connection.mysqlPedidos.findOne({where:{id_pedido: id}});
+
+            pedido.localizacao = localizacao;
+            pedido.descricao = descricao;
+
+            await pedido.save();
+
+            return res.status(202).json({mensagem: "Alteração feita"});
+
+        }catch(e){
+            return res.status(400).json({error: e.message});
+        }
+    },
 }

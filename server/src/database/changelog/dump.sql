@@ -108,16 +108,16 @@ CREATE TABLE IF NOT EXISTS `Techgo`.`banimento` (
     FOREIGN KEY (`usuarios_id`)
     REFERENCES `Techgo`.`usuarios` (`id`))
 ENGINE = InnoDB;
+insert into techgo.categoria values(null, 'técnico', 'especialista em aperelhos eletronicos');
+insert into techgo.categoria values(null, 'eletricista', 'especialista em redes elétricas');
 
-insert into Techgo.Administrador values(uuid(), 'sergio', sha1('senha'));
+#comandos de debug
+
 /*
 insert into Techgo.Usuarios values('uuid2', '10000000000', 'infrator', 'infrator@gmail.com', sha1('senha') ,'inativo' ,'2004-05-22', '2020-04-02');
 insert into Techgo.Usuarios values('uuid3', '20000000000', 'joão', 'joãozin@gmail.com', sha1('senha') ,'ativo' ,'2004-05-22', '2020-04-01');
 insert into techgo.banimento values('uuid1', 'uuid2', 'usuario roubou seu trabalhador', '2020-04-05');
-*/
-insert into techgo.categoria values(null, 'técnico', 'especialista em aperelhos eletronicos');
-insert into techgo.categoria values(null, 'eletricista', 'especialista em redes elétricas');
-/*
+insert into Techgo.Administrador values(uuid(), 'sergio', sha1('senha'));
 insert into techgo.trabalhadores values('uuid5', '10010000000', 'trabalhador', 'trabalhador@gmail.com', sha1('senha') ,'premium' ,'2004-05-22', '2020-04-02', 2);
 insert into techgo.trabalhadores values('uuid6', '10010060000', 'ronaldo', 'ronaldo@gmail.com', sha1('senha') ,'premium' ,'2004-05-22', '2020-04-12', 1);
 insert into techgo.pedidos values('uuid7', '2020-04-03', '2020-04-04', '400.00', 'uuid5', 'uuid2');
@@ -127,6 +127,7 @@ insert into techgo.banimento2 values('uuid1', 'uuid5' , 'trabalhador roubou seu 
 show columns from techgo.mensagens;
 */
 delete from trabalhadores limit 1;
-delete from usuarios limit 1;
+delete from pedidos limit 1;
+update trabalhadores set `status` = 'ativo' where nome = 'Rodrigo Elias';
 select * from trabalhadores;
 describe categoria;

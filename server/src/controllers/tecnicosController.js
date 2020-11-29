@@ -71,6 +71,7 @@ module.exports = {
             sha.update(senha);
 
             const tecnico = await connection.mysqlTrabalhador.findAll({
+                attributes:['id','nome','email','status'],
                 where:{
                     nome: nome,
                     senha: sha.digest('hex'),

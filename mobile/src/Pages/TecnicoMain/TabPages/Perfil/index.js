@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import Constants from 'expo-constants'
-import { SafeAreaView, Text, AsyncStorage, StyleSheet, TouchableOpacity, Alert} from 'react-native';
+import { SafeAreaView, Text, AsyncStorage, StyleSheet, TouchableOpacity, Alert, View} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import api from '../../../../Services/api';
 
@@ -18,7 +18,27 @@ export default function Home(){
         }
     }
 
-
+    async function onPressLogOut(){
+        Alert.alert(
+            'Sair',
+            'Deseja sair?',
+            [
+              {
+                text: 'Sim',
+                onPress: async () => {
+                    await AsyncStorage.removeItem('Session');
+                    nav.navigate('Index');
+                }
+              },
+              {
+                text: 'Não',
+                onPress: () => {},
+                style: 'cancel'
+              }
+            ],
+            { cancelable: false }
+          );
+    }
 
     async function onPressDeletar(){
 
@@ -48,17 +68,24 @@ export default function Home(){
 
     return(
         <SafeAreaView style={styles.container}>
-            <Text>
-                Nome: {getTecnico.nome}
+            <Text style={styles.text}>
+                Nome: {"\n"+ getTecnico.nome}
             </Text>
-            <Text>
-                Email: {getTecnico.email}
+            <Text style={styles.text}>
+                Email: {"\n"+ getTecnico.email}
             </Text>
-            <TouchableOpacity onPress={onPressDeletar}>
-                <Text>
-                    Deletar Conta
-                </Text>
-            </TouchableOpacity>
+            <View style={styles.containerBtn}>
+                <TouchableOpacity style={styles.btn} onPress={onPressDeletar}>
+                    <Text style={styles.textBtn}>
+                        Deletar Conta
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.btn} onPress={onPressLogOut}>
+                    <Text style={styles.textBtn}>
+                        Log Out
+                    </Text>
+                </TouchableOpacity>
+            </View>
         </SafeAreaView>
     );
 }
@@ -68,5 +95,27 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 24,
         paddingTop: Constants.statusBarHeight + 20,
+    },
+    containerBtn:{
+        flexDirection: 'row',
+        justifyContent: "space-between",
+        marginTop: '100%'
+    },
+    text: {
+        fontSize:18,
+        lineHeight: 30
+    },
+    textBtn: {
+        fontSize:18,
+        lineHeight: 30,
+        color:'#FFF'
+    },
+    btn:{
+        backgroundColor: '#ff0000',
+        width: '40%',
+        height: 40,
+        alignItems: 'center',
+        textAlign: 'center',
+        borderRadius: 9
     }
 });
