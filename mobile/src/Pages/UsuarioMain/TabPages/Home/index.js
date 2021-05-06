@@ -1,33 +1,22 @@
 import React, {useEffect, useState} from 'react';
-import Constants from 'expo-constants'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { SafeAreaView, Text, AsyncStorage, StyleSheet, View} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView, Text, StyleSheet, View} from 'react-native';
 
 import Pendente from './TopTabPages/Pendentes'; 
 import Fechado from './TopTabPages/Fechado'; 
 import Cobrar from './TopTabPages/Cobrar'; 
+import { useAuth } from '../../../../Contexts/AuthContext';
 
 export default function Home(){
-    const nav = useNavigation();
     const Tab = createMaterialTopTabNavigator();
 
     const [getUsuario, setUsuario] =  useState({});
     
-
-    async function carregarUsuario(){
-        const usuario = JSON.parse(await AsyncStorage.getItem('Session'));
-        if(usuario){
-            setUsuario(usuario);
-        }else{
-            nav.navigate('Index')
-        }
-    }
     
-   
+    const {getUserInfos} = useAuth();
 
     useEffect(()=>{
-        carregarUsuario()
+        getUserInfos().then(e=>setUsuario(e))
     },[]);
 
 
@@ -39,7 +28,7 @@ export default function Home(){
                 </Text>
             </View>
             <Tab.Navigator
-            initialRouteName="Feed"
+            initialRouteName="Pendentes"
             tabBarOptions={{
                 activeTintColor: '#e91e63',
                 labelStyle: { fontSize: 12 },
@@ -47,17 +36,17 @@ export default function Home(){
             }}
             >
                 <Tab.Screen
-                    name="Feed"
+                    name="Pendentes"
                     component={Pendente}
                     options={{ tabBarLabel: 'Pendentes' }}
                 />
                 <Tab.Screen
-                    name="Notifications"
+                    name="Pagar"
                     component={Cobrar}
                     options={{ tabBarLabel: 'Pagar' }}
                 />
                 <Tab.Screen
-                    name="Profile"
+                    name="Finalizados"
                     component={Fechado}
                     options={{ tabBarLabel: 'Finalizados' }}
                 />
@@ -68,8 +57,7 @@ export default function Home(){
 
 const styles = StyleSheet.create({
     container:{
-        flex: 1,
-        paddingTop: Constants.statusBarHeight + 20
+        flex: 1
     },
     title:{
         fontSize: 16,

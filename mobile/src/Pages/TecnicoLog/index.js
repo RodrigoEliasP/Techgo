@@ -1,35 +1,28 @@
 import React, {useState} from 'react';
 import Constants from 'expo-constants';
-import { SafeAreaView, Text, StyleSheet, TouchableOpacity ,TextInput, Alert, AsyncStorage} from 'react-native';
+import { SafeAreaView, Text, StyleSheet, TouchableOpacity ,TextInput, Alert} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import TopBar from '../../Components/TopBar';
 import * as yup from 'yup';
 
-
 import api from '../../Services/api';
+import { useAuth } from '../../Contexts/AuthContext';
 
 export default function TecnicoCard(){
     const Nav = useNavigation();
+    const { startSession } = useAuth();
 
-    const [getNome, setNome] = useState('');
+    const [getEmail, setEmail] = useState('');
     const [getSenha, setSenha] = useState('');
 
-    async function criarSessao(usuario){
-        
-        await AsyncStorage.setItem(
-            'Session',
-            JSON.stringify(usuario)
-        );
-    };
     const campos = yup.object().shape({
-        nome: yup.string().required('Digite seu nome'),
+        email: yup.string().email('email inválido').required('Digite seu email'),
         senha: yup.string().required('Digite sua senha'),
     })
 
     async function clickLogar(){
         try{
             const dados = {
-                nome: getNome,
+                email: getEmail,
                 senha: getSenha
             }
             campos.validateSync(dados);
@@ -40,27 +33,24 @@ export default function TecnicoCard(){
                 },
             });
             if(response.data.error){
+                console.log(response.data)
                 throw new Error(response.data.error)
             }else{
-                criarSessao(response.data);
-                Nav.navigate('TecnicoMain')
+                await startSession(response.data, 'ami');
             }
         }catch(e){
             Alert.alert('Atenção', e.message)
         }
-        
-
     }
     
     function clickCadastro(){
-        Nav.navigate('RegistroTecnico');
+        Nav.navigate('Registro Técnico');
     }
 
     return(
         <SafeAreaView style={styles.container}>
-            <TopBar nome="Login Técnico"/>
-            <Text style={styles.logop}>Nome</Text>
-            <TextInput onChangeText={setNome} style={styles.loginfield}/>
+            <Text style={styles.logop}>Email</Text>
+            <TextInput onChangeText={setEmail} style={styles.loginfield}/>
             <Text style={styles.logop}>Senha</Text>
             <TextInput secureTextEntry={true} onChangeText={setSenha} style={styles.loginfield}/>
             <TouchableOpacity onPress={clickLogar}>

@@ -1,41 +1,61 @@
-import React, {useEffect, useState} from 'react';
-import Constants from 'expo-constants';
-import { SafeAreaView, Text, StyleSheet, TouchableOpacity, View, AsyncStorage, Alert } from 'react-native';
+import React, { useState, useEffect} from 'react';
+import { 
+    SafeAreaView, 
+    Text, 
+    StyleSheet, 
+    TouchableOpacity, 
+    View, 
+    Alert,
+    Image
+ } from 'react-native';
 import { TextInputMask } from 'react-native-masked-text';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import TopBar from '../../Components/TopBar';
+
+import emptypfp from '../../../assets/emptypfp.jpg';
 import api from '../../Services/api'
+import { useAuth } from '../../Contexts/AuthContext';
 
 export default function DetalhesPedidoTecnico(){
 
     const nav = useNavigation();
     const route = useRoute();
     const pedido = route.params.pedido;
-
-
-    const [ getCobrança, setCobrança ] = useState('');
-    const [getTecnico, setTecnico] =  useState({});
+    const data_conclusao = new Date(pedido.data_conclusao)
+    const {Usuario} = pedido;
     
-    async function carregarTecnico(){
-        const tecnico = JSON.parse(await AsyncStorage.getItem('Session'));
-        if(tecnico){
-            setTecnico(tecnico);
-        }else{
-            nav.navigate('Index')
-        }
-    }
+
+
+    const [ getCobranca, setCobranca ] = useState('');
+    const [ getImage, setImage ] = useState({});
+    const {getUserToken} = useAuth()
+
+    useEffect(()=>{
+        
+        Image.prefetch(Usuario.pfp).then(e=>{
+            e && setImage({
+                uri: Usuario.pfp + '?time=' + new Date(),
+                width: 100,
+                height: 100,
+                method: 'GET',
+                headers: {
+                    Pragma: 'no-cache'
+                },
+            })
+        });
+    },[])
 
     async function onPressCobrar(){
         try{
-            const valor = Number(getCobrança.replace(/[R$]/g, '').replace(/,/, '.'))
-            
+            const valor_fechado = Number(getCobranca.replace(/[R$]/g, '').replace(/,/, '.'))
+            const token = `Bearer ${await getUserToken()}`
             const dados = {
-                trabalhador: getTecnico.id,
-                valor_fechado: valor,
-                id: pedido.id_pedido
-                
+                valor_fechado,
+                id_pedido: pedido.id_pedido
             }
             const response = await api.put('pedidosDemand', dados, {
+                headers:{
+                    authorization: token
+                },
                 validateStatus: status=>{
                     return status < 500
                 }
@@ -43,25 +63,24 @@ export default function DetalhesPedidoTecnico(){
             if(response.data.error){
                 throw new Error(response.data.error)
             }
-            Alert.alert(response.data.mensagem);
-            setTimeout(()=>{
-                nav.goBack();
-            }, 2000)
-
+            Alert.alert("Sucesso", response.data.mensagem, [{
+                text: "ok",
+                onPress: () => nav.goBack()
+            }]);
         }catch(err){
-            Alert.alert(err.message)
+            Alert.alert("Erro", err.message)
         }
     }
-    function bindar(status){
+    function renderizarUIPorStatus(status){
         switch(status){
             case 'pendente':
                 return (
                     <>
                         <TextInputMask 
                         style={styles.field}
-                        value={getCobrança}
+                        value={getCobranca}
                         type={'money'}
-                        onChangeText={setCobrança} />
+                        onChangeText={setCobranca} />
                         <TouchableOpacity style={styles.btnCobrar} onPress={onPressCobrar}>
                             <Text style={styles.txtBtn}>Cobrar</Text>
                         </TouchableOpacity>
@@ -82,20 +101,33 @@ export default function DetalhesPedidoTecnico(){
         }
     }
 
-    useEffect(()=>{carregarTecnico()},[]);
-
     return (
         <SafeAreaView style={styles.container}>
-            <TopBar/>
             <Text style={styles.title}>Detalhes do pedido:</Text>
-            <Text style={styles.text}>Localização do pedido: {'\n'+pedido.localizacao}</Text>
-            <Text style={styles.text}>Descrição do pedido: {'\n'+pedido.descricao}</Text>
-            <Text style={styles.text}>Informações sobre o emissor:</Text>
-            <Text style={styles.text}>Nome do Emissor: {'\n'+pedido.usuario.nome}</Text>
-            <Text style={styles.text}>Email para contato: {'\n'+pedido.usuario.email}</Text>
+            <View style={styles.detailContainer}>
+                <Text style={styles.text}>Localização: {'\n'+pedido.localizacao}</Text>
+                <Text style={styles.text}>Descrição: {'\n'+pedido.descricao}</Text>
+                {
+                    pedido.status === 'fechado' && 
+                    <Text style={styles.text}>
+                        data de conclusão: 
+                        {'\n' + data_conclusao.getDate()+'/'
+                        +data_conclusao.getMonth()+'/'
+                        +data_conclusao.getFullYear()}
+                    </Text>
+                }
+            </View>
+            <Text style={styles.title}>Informações sobre o emissor:</Text>
+            <View style={styles.emitterContainer}>
+                <View>
+                    {!getImage ? (<Image style={styles.emitterPfp} source={emptypfp}/>): (<Image style={styles.emitterPfp} source={getImage}/>)}
+                </View>
+                <Text style={styles.text}>Nome: {'\n'+Usuario.nome}</Text>
+                <Text style={styles.text}>Email: {'\n'+Usuario.email}</Text>
+            </View>
             <View>
                 {
-                    bindar(pedido.status)
+                    renderizarUIPorStatus(pedido.status)
                 }
             </View>
         </SafeAreaView>
@@ -105,8 +137,6 @@ export default function DetalhesPedidoTecnico(){
 const styles = StyleSheet.create({
     container:{
         flex: 1,
-        paddingHorizontal: 24,
-        paddingTop: Constants.statusBarHeight + 20,
         margin: '5%'
     },
     title:{
@@ -117,7 +147,6 @@ const styles = StyleSheet.create({
     },
     text:{
         fontSize: 16,
-        marginBottom: 20
     },
     containerBtn:{
         flexDirection: 'row',
@@ -147,5 +176,24 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         textAlign: 'center',
         borderRadius: 9
+    }, 
+    detailContainer:{
+        minHeight: 150,
+        maxHeight: 200,
+        width: '100%',
+        justifyContent: 'space-around',
+        alignContent: 'center'
+    },
+    emitterContainer:{
+        height: 250,
+        paddingHorizontal: 30,
+        justifyContent: 'space-evenly',
+        backgroundColor: '#dedede',
+        marginBottom: 20,
+    }, 
+    emitterPfp: {
+        width: 100,
+        height: 100,
+        borderRadius: 70
     }
 });

@@ -1,33 +1,25 @@
-import React, {useEffect, useState} from 'react';
-import Constants from 'expo-constants';
+import React, {useState, useEffect} from 'react';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { SafeAreaView, Text, AsyncStorage, StyleSheet, View} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView, Text, StyleSheet, View} from 'react-native';
 
 import Procurar from './TopTabPages/Procurar'; 
 import Fechado from './TopTabPages/Fechados'; 
 import Cobrar from './TopTabPages/Cobrar'; 
+import { useAuth } from '../../../../Contexts/AuthContext';
 
 export default function Home(){
 
     const Tab = createMaterialTopTabNavigator();
 
-    const nav = useNavigation();
+    const {getUserInfos} = useAuth();
+    const [getTecnico, setTecnico] = useState({});
 
-    const [getTecnico, setTecnico] =  useState({});
-
-    async function carregarTecnico(){
-        const tecnico = JSON.parse(await AsyncStorage.getItem('Session'));
-        if(tecnico){
-            setTecnico(tecnico);
-        }else{
-            nav.navigate('Index')
-        }
-    }
-
-    useEffect(()=>{
-        carregarTecnico();
-    },[])
+    useEffect(
+        ()=>{
+            getUserInfos().then(e=>setTecnico(e)).catch(e=>{})
+        },
+        []
+    );
 
     return(
         <SafeAreaView style={styles.container}>
@@ -66,8 +58,7 @@ export default function Home(){
 
 const styles = StyleSheet.create({
     container:{
-        flex: 1,
-        paddingTop: Constants.statusBarHeight + 20
+        flex: 1
     },
     title:{
         fontSize: 16,

@@ -1,5 +1,6 @@
 import React from 'react';
 import { SafeAreaView, Text, TouchableOpacity, StyleSheet} from 'react-native';
+
 import {useNavigation} from '@react-navigation/native';
 
 
@@ -7,11 +8,11 @@ export default function Index(){
     const Nav = useNavigation();
 
     const navigateToTecnico = () => {
-        Nav.navigate('TecnicoCard');
+        Nav.navigate('Técnico Login');
     }
 
     const navigateToUsuario = () => {
-        Nav.navigate('UsuarioCard');
+        Nav.navigate('Usuário Login');
     }
 
     return(
@@ -30,12 +31,12 @@ export default function Index(){
 }   
 
 const styles = StyleSheet.create({
-   
+    
     container:{
         flex: 1 ,
         paddingHorizontal: 24,
         margin: "5%",
-        justifyContent: 'center'
+        justifyContent: 'center',
         
     },
     menutitle:{

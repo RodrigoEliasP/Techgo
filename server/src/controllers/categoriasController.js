@@ -1,11 +1,11 @@
-const connection = require('../database/db.js');
+const connection = require('../../models');
 
 module.exports = {
     async index(req, res){
         try{
             const {page = 1} = req.query;
             
-            const categorias = await connection.mysqlCategoria.findAndCountAll({
+            const categorias = await connection.Categoria.findAndCountAll({
                 limit: 10,
                 offset: ((page -1) * 10),
             });

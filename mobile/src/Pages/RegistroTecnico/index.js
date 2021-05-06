@@ -4,7 +4,6 @@ import {SafeAreaView, Text, StyleSheet, TextInput, TouchableOpacity, Alert, View
 import {TextInputMask} from 'react-native-masked-text';
 import RNPickerSelect from 'react-native-picker-select';
 import {useNavigation} from '@react-navigation/native';
-import TopBar from '../../Components/TopBar';
 import * as yup from 'yup';
 
 import api from '../../Services/api';
@@ -12,7 +11,7 @@ import api from '../../Services/api';
 
 export default function RegistroTecnico(){
     const Nav = useNavigation();
-
+    
     const [getCpf, setCpf] = useState('');
     const [getNascimento, setNascimento] = useState('');
     const [getEmail, setEmail] = useState('');
@@ -56,10 +55,12 @@ export default function RegistroTecnico(){
             if(response.data.error){
                 throw new Error(response.data.error)
             }
-            Alert.alert(response.data.mensagem);
-            setTimeout(()=>{
-                Nav.goBack();
-            }, 2000)
+            Alert.alert("Sucesso", response.data.mensagem, [
+                {
+                    text: "Ok",
+                    onPress: () => Nav.goBack()
+                },
+            ]);
         }catch(e){
             Alert.alert(e.message)
         }
@@ -74,9 +75,8 @@ export default function RegistroTecnico(){
 
     return(
         <SafeAreaView style={styles.container}>
-            <TopBar/>
-            <Text style={styles.tittle}>Preencha os campos</Text>
-            <View style={styles.formContainer}>
+            <Text style={styles.title}>Preencha os Campos</Text>
+            <View>
                 <Text style={styles.formText}>Nome:</Text>
                 <TextInput style={styles.cadField} onChangeText={setNome}></TextInput>
 
@@ -134,13 +134,9 @@ const styles = StyleSheet.create({
         paddingTop: Constants.statusBarHeight + 20,
         margin: '5%'
     },
-    tittle:{
+    title:{
         fontSize: 20,
         alignSelf: 'center'
-    },
-    formContainer:{
-        marginTop: 20,
-        
     },
     formText:{
         fontSize: 16,
@@ -186,7 +182,7 @@ const styles = StyleSheet.create({
 const picker = {
     inputAndroid:{
         color:'black',
-        padding: 5,
+        padding: 20,
     },
     inputIOS:{
         color:'black'

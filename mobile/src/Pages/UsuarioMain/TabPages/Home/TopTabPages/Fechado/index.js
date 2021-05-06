@@ -1,17 +1,29 @@
 import React, {useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import {FlatList, Text, TouchableOpacity, View, AsyncStorage, StyleSheet} from 'react-native';
+import {FlatList, StyleSheet} from 'react-native';
+
 import api from '../../../../../../Services/api';
 import Card from '../../../../../../Components/Card/index';
+import { useAuth } from '../../../../../../Contexts/AuthContext';
 
 
-export default function Pendente(){
+export default function Fechado(){
     const nav = useNavigation();
+    const {getUserToken} = useAuth();
 
     const [getPedidos, setPedidos] = useState([]);
     const [total, setTotal] =  useState(0);
     const [getPage, setPage] =  useState(1);
     const [loading, setLoading] =  useState(false);
+
+    useEffect(()=>{
+        
+        const loadPage = nav.addListener('focus', async ()=>{
+            setLoading(true);
+            await loadPedidos();
+        });
+        return loadPage;
+    },[nav]);
 
     async function loadPedidos(){
         if(loading){
@@ -24,17 +36,19 @@ export default function Pendente(){
 
         setLoading(true);
 
-        const usuario = JSON.parse(await AsyncStorage.getItem('Session'));
+        const token = `Bearer ${await getUserToken()}`;
 
         const response = await api.get('pedidosGet/own', {
             params: {
                 page:  getPage,
-                usuarioId: usuario.id,
                 usuarioTipo: 'usuario',
                 status: 'fechado'
+            },
+            headers: {
+                authorization: token
             }
         });
-        
+
 
         setPage(getPage + 1);
         setPedidos([ ...getPedidos, ...response.data ]);
@@ -43,17 +57,8 @@ export default function Pendente(){
     }
 
     function mostrarDetalhes(pedido){
-        nav.navigate('DetalhesPedidoUsuario', {pedido})
+        nav.navigate('Detalhes Pedido Usuário', {pedido})
     }
-
-    useEffect(()=>{
-        
-        const loadPage = nav.addListener('focus', async ()=>{
-            setLoading(true);
-            await loadPedidos();
-        });
-        return loadPage;
-    },[nav]);
 
     return(
         <FlatList 

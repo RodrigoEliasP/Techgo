@@ -1,10 +1,14 @@
 const express = require('express');
 const {celebrate, Segments, Joi} = require('celebrate');
 
+const authController = require('./controllers/authController');
 const tecnicosController = require('./controllers/tecnicosController');
 const usuariosController = require('./controllers/usuariosController');
 const pedidosController = require('./controllers/pedidosController');
 const categoriasController = require('./controllers/categoriasController');
+
+const authMiddleware = require('./middleware/authMiddleware');
+const imageMiddleware = require('./middleware/imageMiddleware');
 
 const routes = express.Router();
 
@@ -31,30 +35,24 @@ routes.post('/tecnicosPost', celebrate({
 
 routes.post('/tecnicoLog', celebrate({
     [Segments.BODY]: Joi.object().keys({
-        nome: Joi.string().required(),
+        email: Joi.string().required().email(),
         senha: Joi.string().required()
     })
-}), tecnicosController.log);
+}), authController.authTecnico);
 
-routes.delete('/tecnicosDelete/:id', celebrate({
-    [Segments.PARAMS]: Joi.object().keys({
-        id: Joi.string().required()
-    })
-}), tecnicosController.delete)
-routes.patch('/tecnicosPremium/:id', celebrate({
-    [Segments.PARAMS]: Joi.object().keys({
-        id: Joi.string().required()
-    })
-}), tecnicosController.premium)
+routes.patch('/tecnicosPfp/', authMiddleware, imageMiddleware, tecnicosController.editPfp);
+
+routes.delete('/tecnicosDelete/', authMiddleware, tecnicosController.delete)
+routes.patch('/tecnicosPremium/', authMiddleware, tecnicosController.premium)
 
 
-routes.get('/usuariosGet', celebrate({
+routes.get('/usuariosGet/', celebrate({
     [Segments.QUERY]: Joi.object().keys({
         page: Joi.number().positive()
     })
 }), usuariosController.index);
 
-routes.post('/usuariosPost', celebrate({
+routes.post('/usuariosPost/', celebrate({
     [Segments.BODY]: Joi.object().keys({
         cpf: Joi.string().required().length(11),
         nome: Joi.string().required().min(10).max(80),
@@ -64,75 +62,58 @@ routes.post('/usuariosPost', celebrate({
     })
 }), usuariosController.create);
 
-routes.post('/usuarioLog', celebrate({
+routes.patch('/usuariosPfp/', authMiddleware, imageMiddleware, usuariosController.editPfp);
+
+routes.post('/usuarioLog/', celebrate({
     [Segments.BODY]: Joi.object().keys({
-        nome: Joi.string().required(),
+        email: Joi.string().required().email(),
         senha: Joi.string().required()
     })
-}), usuariosController.log);
+}), authController.authUsuario);
 
-routes.delete('/usuariosDelete/:id', celebrate({
-    [Segments.PARAMS]: Joi.object().keys({
-        id: Joi.string().required()
-    })
-}), usuariosController.delete)
+routes.delete('/usuariosDelete/', authMiddleware, usuariosController.delete)
 
 routes.get('/pedidosGet', celebrate({
     [Segments.QUERY]: Joi.object().keys({
         page: Joi.number().positive()
     })
-}), pedidosController.index);
+}), pedidosController.search);
 
 routes.get('/pedidosGet/own',celebrate({
     [Segments.QUERY]: Joi.object().keys({
         page: Joi.number().positive(),
-        usuarioId: Joi.string().required(),
         usuarioTipo: Joi.string().required(),
         status: Joi.string().required()
     })
-}), pedidosController.selectOwn)
+}), authMiddleware, pedidosController.selectOwn)
 
 routes.post('/pedidosPost', celebrate({
     [Segments.BODY]: Joi.object().keys({
         descricao: Joi.string().required(),
-        usuario: Joi.string().required().uuid(),
         localizacao: Joi.string().required()
     })
-}), pedidosController.create);
+}), authMiddleware, pedidosController.create);
 
 routes.put('/pedidosDemand', celebrate({
     [Segments.BODY]: Joi.object().keys({
-        id: Joi.string().required(),
-        valor_fechado: Joi.number().positive(),
-        trabalhador: Joi.string().required()
+        id_pedido: Joi.string().required().uuid(),
+        valor_fechado: Joi.number().positive()
     })
-}), pedidosController.demand);
+}), authMiddleware, pedidosController.demand);
 
 routes.put('/pedidosPut', celebrate({
     [Segments.BODY]: Joi.object().keys({
-        id: Joi.string().required(),
+        id_pedido: Joi.string().required().uuid(),
         descricao: Joi.string().required(),
         localizacao: Joi.string().required()
     })
-}), pedidosController.put);
+}), authMiddleware, pedidosController.put);
 
-routes.patch('/pedidosPay/:id', celebrate({
-    [Segments.PARAMS]: Joi.object().keys({
-        id: Joi.string().required()
-    })
-}), pedidosController.pay);
+routes.patch('/pedidosPay/:id_pedido', authMiddleware, pedidosController.pay);
 
-routes.patch('/pedidosDelete/:id', celebrate({
-    [Segments.PARAMS]: Joi.object().keys({
-        id: Joi.string().required()
-    })
-}), pedidosController.delete);
+routes.delete('/pedidosDelete/:id_pedido', authMiddleware, pedidosController.delete);
 
-routes.patch('/pedidosDispatch/:id', celebrate({
-    [Segments.PARAMS]: Joi.object().keys({
-        id: Joi.string().required()
-    })
-}), pedidosController.dispatch);
+routes.patch('/pedidosDispatch/:id_pedido', authMiddleware, pedidosController.dispatch);
 
 routes.get('/categoriasGet', celebrate({
     [Segments.QUERY]: Joi.object().keys({

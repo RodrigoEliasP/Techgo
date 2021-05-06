@@ -1,11 +1,15 @@
 import React, {useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import {FlatList, Text, TouchableOpacity, View, AsyncStorage, StyleSheet} from 'react-native';
+import {FlatList, Text, StyleSheet} from 'react-native';
+
 import api from '../../../../../../Services/api';
 import Card from '../../../../../../Components/Card';
+import { useAuth } from '../../../../../../Contexts/AuthContext';
 
-export default function Pendente(){
+export default function Procurar(){
     const nav = useNavigation();
+
+    const {getUserInfos} = useAuth();
 
     const [getTecnico, setTecnico] = useState({});
     const [getPedidos, setPedidos] = useState([]);
@@ -13,14 +17,18 @@ export default function Pendente(){
     const [getPage, setPage] =  useState(1);
     const [loading, setLoading] =  useState(false);
 
-    async function carregarTecnico(){
-        const tecnico = JSON.parse(await AsyncStorage.getItem('Session'));
-        if(tecnico){
-            setTecnico(tecnico);
-        }else{
-            nav.navigate('Index')
-        }
-    }
+    useEffect(()=>{
+        getUserInfos().then(e=>setTecnico(e)).catch(e=>{})
+    },[])
+
+    useEffect(()=>{
+        
+        const loadPage = nav.addListener('focus', async ()=>{
+            setLoading(true);
+            await loadPedidos();
+        });
+        return loadPage;
+    },[nav]);
 
     async function loadPedidos(){
         if(loading){
@@ -47,18 +55,9 @@ export default function Pendente(){
     }
 
     function mostrarDetalhes(pedido){
-        nav.navigate('DetalhesPedidoTecnico', {pedido})
+        nav.navigate('Detalhes Pedido Técnico', {pedido})
     }
 
-    useEffect(()=>{
-        carregarTecnico();
-        const loadPage = nav.addListener('focus', async ()=>{
-            setLoading(true);
-            await loadPedidos();
-        });
-        console.log('a')
-        return loadPage;
-    },[nav]);
     if(getTecnico.status === 'premium'){
         return(
             <FlatList 
@@ -79,10 +78,11 @@ export default function Pendente(){
         );
     }else{
         return(
-            <Text style={styles.text}>Ooops! você precisa de ser premium para achar pedidos</Text>
+            <Text style={styles.text}>Ooops! você precisa ser premium para achar pedidos</Text>
         );
     }
 }
+
 const styles = StyleSheet.create({
     container:{
         alignItems: 'center',

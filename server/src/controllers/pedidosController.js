@@ -1,13 +1,29 @@
-const connection = require('../database/db.js');
 const uuid = require('uuid');
 
+const connection = require('../../models');
+
+const objetosJoin = {
+    usuario:
+    {
+        model: connection.Usuario,
+        attributes:['id', 'pfp', 'nome','email','status','data_nascimento','data_registro']
+    },
+    trabalhador:
+    {
+        model: connection.Trabalhador,
+        attributes:['id', 'pfp', 'nome','email','status','data_nascimento','data_registro'],
+        include: [connection.Categoria]
+    }
+}
+
 module.exports = {
-    async index(req, res){
+    async search(req, res){
         try{
             const {page = 1} = req.query;
             
-            const pedidos = await connection.mysqlPedidos.findAndCountAll({
-                include: [connection.mysqlUsuarios, connection.mysqlTrabalhador],
+            const pedidos = await connection.Pedido.findAndCountAll({
+                
+                include: [objetosJoin.usuario, objetosJoin.trabalhador],
                 where:{
                     status: 'pendente'
                 },
@@ -28,19 +44,20 @@ module.exports = {
     },
     async selectOwn(req, res){
         try{
-            const {page = 1, usuarioId, usuarioTipo, status} = req.query;
+            const {Id} = req;
+            const {page = 1, usuarioTipo, status} = req.query;
 
             if(usuarioTipo == "usuario"){
 
-                const pedidos = await connection.mysqlPedidos.findAndCountAll({
+                const pedidos = await connection.Pedido.findAndCountAll({
                     where:{
-                        usuarios_id: usuarioId,
+                        usuarios_id: Id,
                         status
                     },
                     order:[
                         ['data_criacao','desc']
                     ],
-                    include: [connection.mysqlUsuarios, connection.mysqlTrabalhador],
+                    include: [objetosJoin.usuario, objetosJoin.trabalhador],
                     limit: 10,
                     offset: ((page -1) * 10)
                 });
@@ -49,12 +66,12 @@ module.exports = {
 
                 return res.status(200).json(pedidos.rows);
             }else{
-                const pedidos = await connection.mysqlPedidos.findAndCountAll({
+                const pedidos = await connection.Pedido.findAndCountAll({
                     where:{
-                        trabalhadores_id: usuarioId,
+                        trabalhadores_id: Id,
                         status
                     },
-                    include: [connection.mysqlUsuarios, connection.mysqlTrabalhador],
+                    include: [objetosJoin.usuario, objetosJoin.trabalhador],
                     limit: 10,
                     offset: ((page -1) * 10)
                 });
@@ -70,7 +87,8 @@ module.exports = {
     
     async create(req, res){
         try{
-            const {descricao, localizacao, usuario} = req.body;
+            const{Id} = req;
+            const {descricao, localizacao} = req.body;
 
             const data = {
                 id_pedido: uuid.v4(),
@@ -81,10 +99,10 @@ module.exports = {
                 valor_fechado: null,
                 status: 'pendente',
                 trabalhadores_id: null,
-                usuarios_id: usuario
+                usuarios_id: Id
             }
 
-            await connection.mysqlPedidos.create(data)
+            await connection.Pedido.create(data)
 
 
             return res.status(202).json({mensagem: "criado com sucesso"});
@@ -95,12 +113,15 @@ module.exports = {
     },
     async demand(req, res){
         try{
-            const {id, trabalhador, valor_fechado} = req.body;
+            const {Id} = req; 
+            const {id_pedido, valor_fechado} = req.body;
 
-            const pedido = await connection.mysqlPedidos.findOne({where:{id_pedido: id}});
+            
+
+            const pedido = await connection.Pedido.findOne({where:{id_pedido}});
 
             pedido.valor_fechado = valor_fechado;
-            pedido.trabalhadores_id = trabalhador;
+            pedido.trabalhadores_id = Id;
             pedido.status =  'cobrar';
 
             await pedido.save();
@@ -113,13 +134,17 @@ module.exports = {
     },
     async dispatch(req, res){
         try{
-            const {id} = req.params;
+            const {Id} = req;
+            const {id_pedido} = req.params;
 
-            const pedido = await connection.mysqlPedidos.findOne({where:{id_pedido: id}});
+            const pedido = await connection.Pedido.findOne({where:{id_pedido, usuarios_id: Id}});
+            if(!pedido){
+                return res.status(401);
+            }
 
             pedido.valor_fechado = null;
             pedido.trabalhadores_id = null;
-            pedido.status =  'fechado';
+            pedido.status =  'pendente';
 
             await pedido.save();
 
@@ -131,9 +156,13 @@ module.exports = {
     },
     async pay(req, res){
         try{
-            const {id} = req.params;
+            const {Id} = req;
+            const {id_pedido} = req.params;
 
-            const pedido = await connection.mysqlPedidos.findOne({where:{id_pedido: id}});
+            const pedido = await connection.Pedido.findOne({where:{id_pedido, usuarios_id: Id}});
+            if(!pedido){
+                return res.status(401);
+            }
 
             pedido.data_conclusao = Date.now()
             pedido.status = 'fechado'
@@ -148,9 +177,13 @@ module.exports = {
     },
     async delete(req, res){
         try{
-            const {id} = req.params;
+            const {Id} = req;
+            const {id_pedido} = req.params;
+            const pedido = await connection.Pedido.findOne({where:{id_pedido, usuarios_id: Id}});
 
-            const pedido = await connection.mysqlPedidos.findOne({where:{id_pedido: id}});
+            if(!pedido){
+                return res.status(400);
+            }
 
             await pedido.destroy();
 
@@ -162,9 +195,13 @@ module.exports = {
     },
     async put(req, res){
         try{
-            const {id, localizacao, descricao} = req.body;
+            const {Id} = req;
+            const {id_pedido, localizacao, descricao} = req.body;
 
-            const pedido = await connection.mysqlPedidos.findOne({where:{id_pedido: id}});
+            const pedido = await connection.Pedido.findOne({where:{id_pedido, usuarios_id: Id}});
+            if(!pedido){
+                return res.status(401);
+            }
 
             pedido.localizacao = localizacao;
             pedido.descricao = descricao;

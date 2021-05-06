@@ -2,14 +2,25 @@ import React from 'react';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 export default function Card({pedido, mostrar}){
+
     const agora = new Date();
-    const data = new Date(pedido.data_criacao);
-    const diferenca = Math.abs(agora.getTime() - data.getTime());
+    const dataDoPedido = new Date(pedido.data_criacao);
+    const diferenca = Math.abs(agora.getTime() - dataDoPedido.getTime());
     const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
     const horas = Math.floor(diferenca / (1000 * 60 * 60));
-    
+    const minutos = Math.floor(diferenca / (1000 * 60));
+    let mensagem = '';
 
-    
+    if(dias != 0){
+        mensagem = "há: \n" + dias + " Dias";
+    }else if(horas != 0){
+        mensagem = "há: \n" + horas + " Horas";
+    }else if(minutos != 0){
+        mensagem = "há: \n" + minutos + " Minutos";
+    }else{
+        mensagem = "agora mesmo"
+    }
+
     return(
         <View style={styles.pedidoCard}>
             <Text style={styles.text}>
@@ -19,7 +30,7 @@ export default function Card({pedido, mostrar}){
                 Descrição:{"\n" + pedido.descricao}
             </Text>
             <Text style={styles.text}>
-                Criado {(dias != 0)? "há: \n" + dias + ' Dias': "há: \n" + horas + " Horas"}
+                Criado {mensagem}
             </Text>
             <TouchableOpacity style={styles.cardButton} onPress={() => mostrar(pedido)}>
                 <Text style={styles.buttonText}>Ver Pedido</Text>

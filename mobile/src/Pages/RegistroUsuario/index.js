@@ -3,7 +3,6 @@ import Constants from 'expo-constants';
 import {SafeAreaView, Text, StyleSheet, TextInput, TouchableOpacity, Alert, View} from 'react-native';
 import {TextInputMask} from 'react-native-masked-text';
 import {useNavigation} from '@react-navigation/native';
-import TopBar from '../../Components/TopBar';
 import * as yup from 'yup';
 
 import api from '../../Services/api';
@@ -53,12 +52,13 @@ export default function RegistroTecnico(){
                 throw new Error(resolve.data.error)
             }
 
-            Alert.alert(resolve.data.mensagem);
+            Alert.alert("Sucesso", resolve.data.mensagem, [
+                {
+                    text: "Ok",
+                    onPress: () => Nav.goBack()
+                },
+            ]);
 
-
-            setTimeout(()=>{
-                Nav.goBack();
-            }, 2000)
         }catch(e){
             Alert.alert(e.message)
         }
@@ -66,7 +66,6 @@ export default function RegistroTecnico(){
 
     return(
         <SafeAreaView style={styles.container}>
-            <TopBar/>
             <Text style={styles.tittle}>Preencha os campos</Text>
             <View style={styles.formContainer}>
                 <Text style={styles.formText} >Nome:</Text>

@@ -1,33 +1,34 @@
 import React, {useEffect, useState} from 'react';
 import Constants from 'expo-constants'
-import { SafeAreaView, Text, AsyncStorage, StyleSheet, TouchableOpacity, Alert, View} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView, Text, StyleSheet, TouchableOpacity, Alert, View} from 'react-native';
+
 import api from '../../../../Services/api';
+import { useAuth } from '../../../../Contexts/AuthContext';
 
 export default function Home(){
-    const nav = useNavigation();
 
     const [getTecnico, setTecnico] =  useState({});
-    
-    async function carregarTecnico(){
-        const tecnico = JSON.parse(await AsyncStorage.getItem('Session'));
-        if(tecnico){
-            setTecnico(tecnico);
-        }else{
-            nav.navigate('Index');
-        }
-    }
+    const {getUserInfos, getUserToken, killSession} = useAuth()
 
     async function onPressPagar(){
-        const response = await api.patch(`tecnicosPremium/${getTecnico.id}`);
-        Alert.alert(response.data.mensagem, 'logue novamente para ativar seu premium');
-        setTimeout(()=>{
-                nav.navigate('Index')
+        const token = `Bearer ${await getUserToken()}`
+        const response = await api.patch(`tecnicosPremium/`, null, {
+            headers:{
+                authorization: token
             }
-        ,2000);
+        });
+        Alert.alert(response.data.mensagem, 'logue novamente para ativar seu premium', 
+        [{
+            text: 'ok',
+            onPress: async () => {
+                await killSession();
+            }
+        }]);
     }
 
-    useEffect(()=>{carregarTecnico();}, []);
+    useEffect(()=>{
+        getUserInfos().then(e=>setTecnico(e)).catch(e=>{})
+    }, []);
 
     return(
         <SafeAreaView style={styles.container}>
@@ -38,7 +39,7 @@ export default function Home(){
             <View>{
                 getTecnico.status == 'premium'? 
                 (<Text style={styles.text}>
-                    Status: {getTecnico.status}
+                    Status: Você já premium vá para Home/Procurar para achar algum pedido
                 </Text>) : 
                 (<>
                     <Text style={styles.text}>

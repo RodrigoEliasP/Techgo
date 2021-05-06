@@ -1,34 +1,28 @@
 import React, {useState} from 'react';
 import Constants from 'expo-constants';
-import { SafeAreaView, AsyncStorage, Text, TouchableOpacity, StyleSheet, TextInput, Alert} from 'react-native';
+import { SafeAreaView, Text, TouchableOpacity, StyleSheet, TextInput, Alert} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import TopBar from '../../Components/TopBar';
 import * as yup from 'yup';
+
 import api from '../../Services/api';
+import { useAuth } from '../../Contexts/AuthContext';
 
 export default function UsuarioCard(){
     const Nav = useNavigation();
+    const {startSession} = useAuth();
 
-    const [getNome, setNome] = useState('');
+    const [getEmail, setEmail] = useState('');
     const [getSenha, setSenha] = useState('');
 
-    async function criarSessao(usuario){
-        
-        await AsyncStorage.setItem(
-            'Session',
-            JSON.stringify(usuario)
-        );
-    };
-
     const campos = yup.object().shape({
-        nome: yup.string().required('Digite seu nome'),
+        email: yup.string().required('Digite seu email').email('Formato de email inválido'),
         senha: yup.string().required('Digite sua senha'),
     })
 
     async function clickLogar(){
         try{
             const dados = {
-                nome: getNome,
+                email: getEmail,
                 senha: getSenha
             }
             campos.validateSync(dados);
@@ -40,8 +34,7 @@ export default function UsuarioCard(){
             if(response.data.error){
                 throw new Error(response.data.error)
             }else{
-                criarSessao(response.data);
-                Nav.navigate('UsuarioMain');
+                await startSession(response.data, 'amb')
             }
         }catch(e){
             Alert.alert('Atenção', e.message)
@@ -51,14 +44,13 @@ export default function UsuarioCard(){
     }
 
     function clickCadastro(){
-        Nav.navigate('RegistroUsuario');
+        Nav.navigate('Registro Usuário');
     }
 
     return(
         <SafeAreaView style={styles.container}>
-            <TopBar nome="Login Usuário"/>
-            <Text style={styles.logop}>Nome</Text>
-            <TextInput onChangeText={setNome} style={styles.loginfield}/>
+            <Text style={styles.logop}>Email</Text>
+            <TextInput onChangeText={setEmail} style={styles.loginfield}/>
             <Text style={styles.logop}>Senha</Text>
             <TextInput secureTextEntry={true} onChangeText={setSenha} style={styles.loginfield}/>
             <TouchableOpacity onPress={clickLogar}>
