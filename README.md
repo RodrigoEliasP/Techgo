@@ -22,6 +22,6 @@ e configurar o ambiente é um pouco trabalhoso então segue o tutorial.
 ### Frontend
 
 * Instale o expo-cli como dependência global caso não tenha ele yarn global add explo-cli
-* Vá até a pasta src/Services, então entre no arquivo api.js e coloque depois do :// seu ip:porta ex http://192.168.0.10:3030
+* Vá até a pasta src/Services, então entre no arquivo api.js e coloque depois do http:// seu ip:porta ex 192.168.0.10:3030
 * Rode o comando expo start
 * Quando abrir a launch page do expo escaneie o qr code com seu celular no aplicativo [ExpoGo](https://play.google.com/store/apps/details?id=host.exp.exponent&hl=pt_BR&gl=US)
