@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "testdb": "node C:/Users/rodri/techgo/server/src/database/db.js",
-    "init": "nodemon C:/Users/rodri/techgo/server/src/index.js"
+    "start": "node C:/Users/rodri/techgo/server/src/index.js"
   },
   "keywords": [],
   "author": "",
